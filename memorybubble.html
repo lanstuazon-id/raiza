@@ -1,0 +1,593 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Memory Bubble</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg1: radial-gradient(circle, #f9f4fc 0%, #e6d4f0 60%, #d4b2e8 100%);
+      --accent: #a259c1;
+      --card-bg: rgba(255, 255, 255, 0.5);
+      --text-color: #4a2f5a;
+      --shadow: 0 8px 30px rgba(44, 31, 62, 0.12);
+      --blur: 10px;
+      font-family: 'Poppins', 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+    }
+
+    html,body{
+      margin:0;
+      background: var(--bg1);
+      -webkit-font-smoothing:antialiased;
+      color: var(--text-color);
+      padding: 2rem;
+      overflow-x: hidden;
+    }
+
+    .home-btn {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      color: var(--text-color);
+      text-decoration: none;
+      font-weight: 600;
+      background: rgba(255,255,255,0.4);
+      padding: 8px 14px;
+      border-radius: 20px;
+      transition: background 0.2s ease;
+      z-index: 100;
+    }
+    .home-btn:hover {
+      background: rgba(255,255,255,0.6);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding-top: 60px;
+      position: relative;
+      z-index: 5;
+    }
+
+    .title {
+      text-align: center;
+      font-family: 'Playfair Display', serif;
+      font-size: 3.2rem;
+      margin-bottom: 0.25rem;
+      letter-spacing: 0.6px;
+      position: relative;
+      color: transparent;
+      background: linear-gradient(90deg, #5b2f7a, #a259c1);
+      -webkit-background-clip: text;
+      background-clip: text;
+    }
+
+    .title::after {
+      content: "";
+      display: block;
+      width: 72px;
+      height: 4px;
+      margin: 10px auto 0;
+      border-radius: 4px;
+      background: linear-gradient(90deg, #a259c1, #d4b2e8);
+      box-shadow: 0 6px 18px rgba(162, 89, 193, 0.12);
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 1.05rem;
+      margin-bottom: 2.2rem;
+      opacity: 0.95;
+      color: #6e527a;
+      font-style: italic;
+      letter-spacing: 0.8px;
+      text-transform: none;
+    }
+
+    .memorybubble-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .memorybubble-item {
+      position: relative;
+      background: var(--card-bg);
+      border-radius: 50%;
+      overflow: hidden;
+      animation: fadeIn 0.6s ease-out forwards;
+      opacity: 0;
+      transform: translateY(10px);
+      aspect-ratio: 1 / 1;
+      backdrop-filter: blur(var(--blur));
+      box-shadow: inset 3px 3px 10px rgba(255, 255, 255, 0.4), 
+                  inset -5px -5px 15px rgba(0, 0, 0, 0.15), 
+                  var(--shadow);
+      cursor: pointer;
+      transition: transform 0.25s ease;
+    }
+
+    .memorybubble-item:hover {
+      transform: scale(1.05);
+    }
+
+    .memorybubble-item::after {
+      content: '';
+      position: absolute;
+      top: 5%;
+      left: 5%;
+      width: 90%;
+      height: 90%;
+      border-radius: 50%;
+      background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0) 65%);
+      pointer-events: none;
+    }
+
+    .bubble-overlay-image::before {
+      content: '';
+      position: absolute;
+      background-image: url('bubble1.png'); 
+      background-size: cover;
+      background-position: center;
+      pointer-events: none;
+      z-index: 2;
+      opacity: 0.6;
+      top: -25px;
+      bottom: -25px;
+      left: -25px;
+      right: -25px;
+    }
+
+    @keyframes fadeIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .memorybubble-item video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .memorybubble-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.35);
+      backdrop-filter: blur(6px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 5000;
+    }
+
+    .memorybubble-expanded {
+      position: relative;
+      border-radius: 50%;
+      overflow: hidden;
+      transform: scale(0.2);
+      transition: transform 0.45s ease, width 0.45s ease, height 0.45s ease;
+      background: var(--card-bg);
+      backdrop-filter: blur(var(--blur));
+      -webkit-backdrop-filter: blur(var(--blur));
+      box-shadow:
+        inset 4px 4px 12px rgba(255, 255, 255, 0.45),
+        inset -6px -6px 18px rgba(0, 0, 0, 0.18),
+        0 12px 40px rgba(0, 0, 0, 0.25);
+    }
+
+    .memorybubble-expanded.show {
+      transform: scale(1);
+      width: 70vmin;
+      height: 70vmin;
+    }
+
+    @media (max-width: 600px) {
+      .memorybubble-expanded.show {
+        width: 90vmin;
+        height: 90vmin;
+      }
+    }
+    
+    .memorybubble-expanded::before {
+      content: "";
+      position: absolute;
+      inset: -8px;
+      border-radius: 50%;
+      z-index: -1;
+      pointer-events: none;
+      background: radial-gradient(circle, rgba(162, 89, 193, 0.55), rgba(162, 89, 193, 0) 70%);
+      filter: blur(18px);
+      animation: bubbleGlow 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes bubbleGlow {
+      from { opacity: 0.45; transform: scale(0.95); }
+      to { opacity: 0.75; transform: scale(1.05); }
+    }
+
+    .video-player-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .custom-progress-bar {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 8px;
+      cursor: pointer;
+      position: relative;
+      margin-top: 10px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #a259c1, #d4b2e8);
+      border-radius: 8px;
+      width: 0%;
+      transition: width 0.1s linear;
+    }
+
+    .progress-thumb {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      background: white;
+      border-radius: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      cursor: grab;
+    }
+
+    .progress-thumb:active {
+      cursor: grabbing;
+    }
+
+    .video-time {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    .video-controls-row {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding: 0 10px;
+    }
+
+    .progress-section {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .volume-control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .volume-icon {
+      font-size: 1.2rem;
+      min-width: 24px;
+      text-align: center;
+    }
+
+    .volume-slider {
+      width: 100px;
+      height: 4px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.3);
+      accent-color: #a259c1;
+      cursor: pointer;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    .volume-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: white;
+      cursor: grab;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    .volume-slider::-moz-range-thumb {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: white;
+      cursor: grab;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+      border: none;
+    }
+
+    .play-pause-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: background 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .play-pause-btn:hover {
+      background: rgba(255, 255, 255, 0.35);
+    }
+
+    .music-controls {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.45);
+      backdrop-filter: blur(12px);
+      padding: 12px 16px;
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+      z-index: 3000;
+    }
+
+    .music-btn {
+      border: none;
+      background: var(--accent);
+      color: white;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: 0.25s ease;
+      box-shadow: 0 0 10px rgba(162, 89, 193, 0.4);
+    }
+
+    .music-controls input[type="range"] {
+      width: 140px;
+      height: 5px;
+      border-radius: 8px;
+      background: linear-gradient(90deg, #a259c1, #d4b2e8);
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+  </style>
+</head>
+
+<body>
+
+<a href="letter.html" class="home-btn">✮ ⋆ ˚｡Back ⋆｡°✩</a>
+
+<audio id="bg-music" src="inside out theme.mp3" loop></audio>
+
+<div class="music-controls">
+  <button id="muteBtn" class="music-btn">🔊</button>
+  <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1">
+</div>
+
+<div class="container">
+  <h1 class="title">Memory Bubble</h1>
+  <p class="subtitle">a collection of our memories in a bubble.</p>
+
+  <div class="memorybubble-grid">
+    <div class="memorybubble-item bubble-overlay-image"><video src="vid for memo bubble/vid 1.MOV" autoplay loop muted playsinline></video></div>
+    <div class="memorybubble-item bubble-overlay-image"><video src="vid for memo bubble/vid 2.MP4" autoplay loop muted playsinline></video></div>
+    <div class="memorybubble-item bubble-overlay-image"><video src="vid for memo bubble/vid 3.MOV" autoplay loop muted playsinline></video></div>
+    <div class="memorybubble-item bubble-overlay-image"><video src="vid for memo bubble/vid 4.MOV" autoplay loop muted playsinline></video></div>
+    <div class="memorybubble-item bubble-overlay-image"><video src="vid for memo bubble/vid 5.mp4" autoplay loop muted playsinline></video></div>
+    <div class="memorybubble-item bubble-overlay-image"><video src="vid for memo bubble/vid 6.MP4" autoplay loop muted playsinline></video></div>
+    <div class="memorybubble-item bubble-overlay-image"><video src="vid for memo bubble/vid 7.MOV" autoplay loop muted playsinline></video></div>
+    <div class="memorybubble-item bubble-overlay-image"><video src="vid for memo bubble/vid 8.MOV" autoplay loop muted playsinline></video></div>
+    <div class="memorybubble-item bubble-overlay-image"><video src="vid for memo bubble/vid 9.MOV" autoplay loop muted playsinline></video></div>
+    <div class="memorybubble-item bubble-overlay-image"><video src="vid for memo bubble/vid 10.MOV" autoplay loop muted playsinline></video></div>
+    <div class="memorybubble-item bubble-overlay-image"><video src="vid for memo bubble/vid 11.MOV" autoplay loop muted playsinline></video></div>
+    <div class="memorybubble-item bubble-overlay-image"><video src="vid for memo bubble/vid 12.MOV" autoplay loop muted playsinline></video></div>
+  </div>
+</div>
+
+<div class="memorybubble-overlay" id="bubbleOverlay"></div>
+
+<script>
+  const music = document.getElementById("bg-music");
+  const volumeSlider = document.getElementById("volumeSlider");
+  const muteBtn = document.getElementById("muteBtn");
+  let originalVolume = 1;
+
+  function startMusic() {
+    music.play().catch(() => {
+      document.addEventListener("click", startMusic, { once: true });
+    });
+  }
+  window.addEventListener("load", startMusic);
+
+  volumeSlider.addEventListener("input", () => {
+    music.volume = volumeSlider.value;
+    originalVolume = volumeSlider.value;
+    muteBtn.textContent = (music.volume == 0) ? "🔇" : "🔊";
+  });
+
+  muteBtn.addEventListener("click", () => {
+    music.muted = !music.muted;
+    muteBtn.textContent = music.muted ? "🔇" : "🔊";
+  });
+
+  const bubbles = document.querySelectorAll(".memorybubble-item");
+  const overlay = document.getElementById("bubbleOverlay");
+
+  bubbles.forEach(bubble => {
+    bubble.addEventListener("click", () => {
+      music.volume = originalVolume * 0.25;
+
+      const clone = bubble.cloneNode(true);
+      clone.classList.add("memorybubble-expanded");
+      
+      // Create video player container with custom controls
+      const container = document.createElement("div");
+      container.classList.add("video-player-container");
+      
+      const video = clone.querySelector("video");
+      video.muted = false;
+      video.controls = false; // Hide native controls
+      
+      // Create time display
+      const timeDisplay = document.createElement("div");
+      timeDisplay.classList.add("video-time");
+      timeDisplay.textContent = "0:00 / 0:00";
+      
+      // Create controls row for progress and volume
+      const controlsRow = document.createElement("div");
+      controlsRow.classList.add("video-controls-row");
+      
+      // Create play/pause button
+      const playPauseBtn = document.createElement("button");
+      playPauseBtn.classList.add("play-pause-btn");
+      playPauseBtn.textContent = "⏸";
+      
+      playPauseBtn.addEventListener("click", () => {
+        if (video.paused) {
+          video.play().catch(() => {});
+          playPauseBtn.textContent = "⏸";
+        } else {
+          video.pause();
+          playPauseBtn.textContent = "▶";
+        }
+      });
+      
+      video.addEventListener("play", () => {
+        playPauseBtn.textContent = "⏸";
+      });
+      
+      video.addEventListener("pause", () => {
+        playPauseBtn.textContent = "▶";
+      });
+      
+      // Create volume control
+      const volumeControl = document.createElement("div");
+      volumeControl.classList.add("volume-control");
+      
+      const volumeIcon = document.createElement("span");
+      volumeIcon.classList.add("volume-icon");
+      volumeIcon.textContent = "🔊";
+      
+      const volumeSlider = document.createElement("input");
+      volumeSlider.type = "range";
+      volumeSlider.classList.add("volume-slider");
+      volumeSlider.min = "0";
+      volumeSlider.max = "1";
+      volumeSlider.step = "0.01";
+      volumeSlider.value = "1";
+      
+      volumeSlider.addEventListener("input", () => {
+        video.volume = volumeSlider.value;
+        volumeIcon.textContent = video.volume == 0 ? "🔇" : "🔊";
+      });
+      
+      volumeControl.appendChild(volumeIcon);
+      volumeControl.appendChild(volumeSlider);
+      
+      // Create progress section
+      const progressSection = document.createElement("div");
+      progressSection.classList.add("progress-section");
+      
+      // Create custom progress bar
+      const progressContainer = document.createElement("div");
+      progressContainer.classList.add("custom-progress-bar");
+      
+      const progressFill = document.createElement("div");
+      progressFill.classList.add("progress-fill");
+      
+      const progressThumb = document.createElement("div");
+      progressThumb.classList.add("progress-thumb");
+      
+      progressContainer.appendChild(progressFill);
+      progressContainer.appendChild(progressThumb);
+      
+      progressSection.appendChild(progressContainer);
+      progressSection.appendChild(timeDisplay);
+      
+      const controlsWrapper = document.createElement("div");
+      controlsWrapper.style.display = "flex";
+      controlsWrapper.style.alignItems = "center";
+      controlsWrapper.style.width = "100%";
+      controlsWrapper.style.justifyContent = "center";
+      controlsWrapper.style.gap = "20px";
+      
+      controlsWrapper.appendChild(volumeControl);
+      controlsWrapper.appendChild(playPauseBtn);
+      
+      controlsRow.appendChild(progressSection);
+      controlsRow.appendChild(controlsWrapper);
+      
+      // Update progress on video time update
+      video.addEventListener("timeupdate", () => {
+        const percent = (video.currentTime / video.duration) * 100;
+        progressFill.style.width = percent + "%";
+        progressThumb.style.left = percent + "%";
+        
+        const currentMin = Math.floor(video.currentTime / 60);
+        const currentSec = Math.floor(video.currentTime % 60);
+        const durationMin = Math.floor(video.duration / 60);
+        const durationSec = Math.floor(video.duration % 60);
+        
+        timeDisplay.textContent = `${currentMin}:${currentSec.toString().padStart(2, "0")} / ${durationMin}:${durationSec.toString().padStart(2, "0")}`;
+      });
+      
+      // Click to seek
+      progressContainer.addEventListener("click", (e) => {
+        const rect = progressContainer.getBoundingClientRect();
+        const percent = (e.clientX - rect.left) / rect.width;
+        video.currentTime = percent * video.duration;
+      });
+      
+      container.appendChild(clone);
+      container.appendChild(controlsRow);
+      
+      overlay.innerHTML = "";
+      overlay.appendChild(container);
+      overlay.style.display = "flex";
+      requestAnimationFrame(() => clone.classList.add("show"));
+
+      video.play();
+    });
+  });
+
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) {
+      music.volume = originalVolume;
+      overlay.style.display = "none";
+      overlay.innerHTML = "";
+    }
+  });
+
+</script>
+
+</body>
+</html>

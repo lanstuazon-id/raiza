@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Our Photobook</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <style>
+  
+  body {
+  opacity: 0;
+  animation: fadeZoomGlow 1.5s ease forwards;
+}
+
+@keyframes fadeZoomGlow {
+  0% {
+    opacity: 0;
+    transform: scale(0.97);
+    box-shadow: 0 0 0px rgba(255, 200, 255, 0);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.02);
+    box-shadow: 0 0 40px rgba(255, 200, 255, 0.3);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 20px rgba(255, 200, 255, 0.2);
+  }
+}
+
+    body {
+      margin: 0;
+      background: radial-gradient(circle, #f9f4fc 0%, #e6d4f0 60%, #d4b2e8 100%);
+      font-family: 'Segoe UI', sans-serif;
+      color: #685176;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .caption {
+      font-size: 0.9rem;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+    }
+
+    .page.visible .caption {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .page-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #4a2f5a;
+      margin: 0 0 15px;
+    }
+
+    .book {
+      width: min(900px, 96vw);
+      height: min(600px, 80vh);
+      perspective: 2000px;
+      position: relative;
+    }
+
+    .page {
+      width: 100%;
+      height: 100%;
+      background: white;
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform-origin: left;
+      transition: transform 1.8s cubic-bezier(.25, .8, .25, 1), box-shadow 1s;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Shadow for the page that is about to be turned (not flipped) */
+    .page:not(.flipped):not(.cover) {
+        box-shadow: 
+            0 4px 20px rgba(0,0,0,0.08), 
+            inset -6px 0 15px -8px rgba(74, 47, 90, 0.5);
+    }
+
+    .page.cover {
+      /* FRONT PAGE ENHANCEMENT: Added subtle paper/linen texture overlay */
+      background-image: 
+          linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+          linear-gradient(135deg, #6a3f7e, #502d5f);
+      background-size: 10px 10px, 10px 10px, 100% 100%;
+      
+      flex-direction: column;
+      gap: 15px;
+      color: white;
+      border: 10px solid #f0e8f7;
+      box-sizing: border-box;
+    }
+
+    /* FRONT PAGE ENHANCEMENT: Thicker, more pronounced inner border/frame */
+    .page.cover::after {
+      content: '';
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      bottom: 10px;
+      border: 3px solid rgba(255, 255, 255, 0.5);
+      border-radius: 4px;
+      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .cover .page-title {
+      color: white;
+      font-size: 2.8rem;
+      /* FRONT PAGE ENHANCEMENT: Deeper shadow and spacing for elegance */
+      text-shadow: 0 4px 15px rgba(0,0,0,0.4);
+      letter-spacing: 2px;
+    }
+
+    .cover-subtitle {
+      font-size: 1rem;
+      opacity: 0.8;
+    }
+
+    .page:not(.cover) {
+      justify-content: center;
+      align-items: center;
+    }
+
+    .page-content {
+      display: flex;
+      flex-direction: row;
+      gap: 10px;
+      width: 90%;
+      height: 90%;
+      margin: auto;
+      text-align: center;
+    }
+
+    .photo-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .photo-item img {
+      flex-grow: 1;
+    }
+
+    .page-content img {
+      flex: 1;
+      min-height: 0;
+    }
+
+    .page img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .page.flipped {
+      transform: rotateY(-180deg);
+      box-shadow: -8px 0 25px rgba(0,0,0,0.15);
+    }
+
+    .controls {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 20px;
+    }
+
+    button {
+      width: 48px;
+      height: 48px;
+      border: 0;
+      border-radius: 50%;
+      background: #a259c1;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 1.3rem;
+      transition: 0.2s;
+      display: grid;
+      place-items: center;
+      line-height: 1;
+      padding: 0;
+    }
+
+    button:hover {
+      background: #8d47ad;
+      transform: translateY(-2px);
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      .book {
+        height: 70vh;
+      }
+      button {
+        padding: 8px 14px;
+        font-size: 0.9rem;
+      }
+    }
+
+    /* Volume Control */
+    .volume-control {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.45);
+      backdrop-filter: blur(12px);
+      padding: 12px 16px;
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+      z-index: 3000;
+    }
+
+    .volume-control #audio-icon {
+      font-size: 1.2rem;
+      min-width: 24px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .volume-control input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 140px;
+      height: 5px;
+      border-radius: 8px;
+      background: linear-gradient(90deg, #a259c1, #d4b2e8);
+      outline: none;
+      cursor: pointer;
+    }
+
+    .volume-control input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      background: white;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .volume-control input[type="range"]::-moz-range-thumb {
+      width: 14px;
+      height: 14px;
+      background: white;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      border: none;
+    }
+
+    .home-btn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      color: #4a2f5a;
+      text-decoration: none;
+      font-weight: 600;
+      background: rgba(255,255,255,0.4);
+      padding: 8px 14px;
+      border-radius: 20px;
+      transition: background 0.2s ease;
+      z-index: 100;
+    }
+    .home-btn:hover {
+      background: rgba(255,255,255,0.6);
+    }
+
+ /* Polaroid Style Layout 
+   ----------------------------------- */
+.page-polaroid .page-content {
+    display: flex; 
+    gap: 30px; 
+}
+
+.page-polaroid .photo-item {
+    background: white; 
+    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2); 
+    padding: 30px 15px 60px 15px; /* Creates space at the bottom */
+    border-radius: 7px;
+    transition: transform 0.3s ease;
+    /* 🔥 FIX 1: Make photo-item relative so caption absolute positioning works */
+    position: relative; 
+}
+
+.page-polaroid .photo-item:nth-child(1) {
+    transform: rotate(-2deg); 
+}
+
+.page-polaroid .photo-item:nth-child(2) {
+    transform: rotate(3deg); 
+}
+
+.page-polaroid .photo-item img {
+    height: 100%; 
+    width: 100%;
+    object-fit: cover;
+}
+
+/* 🔥 FIX 2: Correctly apply combined positioning and the start of the fade-out transform */
+.page-polaroid .caption {
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    width: 80%;
+    font-size: 0.90rem;
+    text-align: center;
+    color: #000000; 
+    opacity: 0;
+    /* Combine centering and initial hidden position (pushed down 10px) */
+    transform: translateX(-50%) translateY(10px); 
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+/* 🔥 FIX 3: Define the fully visible state */
+/* When the page is visible, the caption is centered and brought up (translateY(0)) */
+.page-polaroid.visible .caption {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0); 
+}
+  </style>
+</head>
+<body>
+
+  <a href="letter.html" class="home-btn">✮ ⋆ ˚｡Back ⋆｡°✩</a>
+
+  <div class="book" id="book">
+    <div class="page cover" style="z-index:11">
+      <h2 class="page-title">OUR MOMENTS</h2>
+      <p class="cover-subtitle">A MEMORIES OF ME & U</p>
+    </div>
+    <div class="page page-polaroid" style="z-index:10">
+      <div class="page-content">
+        <div class="photo-item">
+          <img src="pic for photobook/pic 1.JPG" style="object-fit:cover; border-radius:6px;">
+          <p class="caption">our first selfie of 2025</p>
+        </div>
+        <div class="photo-item">
+          <img src="pic for photobook/pic 2.JPG" style="object-fit:cover; border-radius:6px;">
+          <p class="caption">your gifts for me ft. my first hirono!</p>
+        </div>
+      </div>
+    </div>
+    <div class="page page-polaroid" style="z-index:9">
+      <div class="page-content">
+        <div class="photo-item">
+          <img src="pic for photobook/pic 3.JPEG" style="object-fit:cover; border-radius:6px;">
+          <p class="caption">valentine's day!!!</p>
+        </div>
+        <div class="photo-item">
+          <img src="pic for photobook/pic 4.JPG" style="object-fit:cover; border-radius:6px;">
+          <p class="caption">your sea salt matcha ft. biglaang sleepover</p>
+        </div>
+      </div>
+    </div>
+    <div class="page page-polaroid" style="z-index:8">
+      <div class="page-content">
+        <div class="photo-item">
+          <img src="pic for photobook/pic 5.JPG" style="object-fit:cover; border-radius:6px;">
+          <p class="caption">first time trying matcha at coffee break</p>
+        </div>
+        <div class="photo-item">
+          <img src="pic for photobook/pic 6.JPG" style="object-fit:cover; border-radius:6px;">
+          <p class="caption">but first coffee at veles + celebrating your birthday</p>
+        </div>
+      </div>
+    </div>
+    <div class="page page-polaroid" style="z-index:7">
+      <div class="page-content">
+        <div class="photo-item">
+          <img src="photo4a.jpg" style="object-fit:cover; border-radius:6px;">
+          <p class="caption">Your message for Image 4A</p>
+        </div>
+        <div class="photo-item">
+          <img src="photo4b.jpg" style="object-fit:cover; border-radius:6px;">
+          <p class="caption">Your message for Image 4B</p>
+        </div>
+      </div>
+    </div>
+    <div class="page page-polaroid" style="z-index:6">
+      <div class="page-content">
+        <div class="photo-item">
+          <img src="photo5a.jpg" style="object-fit:cover; border-radius:6px;">
+          <p class="caption">Your message for Image 5A</p>
+        </div>
+        <div class="photo-item">
+          <img src="photo5b.jpg" style="object-fit:cover; border-radius:6px;">
+          <p class="caption">Your message for Image 5B</p>
+        </div>
+      </div>
+    </div>
+    <div class="page page-polaroid" style="z-index:5">
+      <div class="page-content">
+        <div class="photo-item">
+          <img src="photo6a.jpg" style="object-fit:cover; border-radius:6px;">
+          <p class="caption">Your message for Image 6A</p>
+        </div>
+        <div class="photo-item">
+          <img src="photo6b.jpg" style="object-fit:cover; border-radius:6px;">
+          <p class="caption">Your message for Image 6B</p>
+        </div>
+      </div>
+    </div>
+    <div class="page page-polaroid" style="z-index:4">
+      <div class="page-content">
+        <div class="photo-item">
+          <img src="photo7a.jpg" style="object-fit:cover; border-radius:6px;">
+          <p class="caption">Your message for Image 7A</p>
+        </div>
+        <div class="photo-item">
+          <img src="photo7b.jpg" style="object-fit:cover; border-radius:6px;">
+          <p class="caption">Your message for Image 7B</p>
+        </div>
+      </div>
+    </div>
+    <div class="page page-polaroid" style="z-index:3">
+      <div class="page-content">
+        <div class="photo-item">
+          <img src="photo8a.jpg" style="object-fit:cover; border-radius:6px;">
+          <p class="caption">Your message for Image 8A</p>
+        </div>
+        <div class="photo-item">
+          <img src="photo8b.jpg" style="object-fit:cover; border-radius:6px;">
+          <p class="caption">Your message for Image 8B</p>
+        </div>
+      </div>
+    </div>
+    <div class="page page-polaroid" style="z-index:2">
+      <div class="page-content">
+        <div class="photo-item">
+          <img src="photo9a.jpg" style="object-fit:cover; border-radius:6px;">
+          <p class="caption">Your message for Image 9A</p>
+        </div>
+        <div class="photo-item">
+          <img src="photo9b.jpg" style="object-fit:cover; border-radius:6px;">
+          <p class="caption">Your message for Image 9B</p>
+        </div>
+      </div>
+    </div>
+    <div class="page page-polaroid" style="z-index:1">
+      <div class="page-content">
+        <div class="photo-item">
+          <img src="photo10a.jpg" style="object-fit:cover; border-radius:6px;">
+          <p class="caption">Your message for Image 10A</p>
+        </div>
+        <div class="photo-item">
+          <img src="photo10b.jpg" style="object-fit:cover; border-radius:6px;">
+          <p class="caption">Your message for Image 10B</p>
+        </div>
+      </div>
+    </div>
+    <div class="page page-polaroid" style="z-index:0">
+      <div class="page-content" style="flex-direction: column; justify-content: center; align-items: center; gap: 20px;">
+        <h2 class="page-title" style="font-size: 3rem; margin: 0;">The End</h2>
+        <p style="opacity: 0.8;">more memories to make.</p>
+        <button onclick="goToFirstPage()" style="width: auto; padding: 10px 20px; border-radius: 12px;">
+          Back to Front Cover
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="volume-control">
+    <span id="audio-icon" style="cursor: pointer;" onclick="toggleMute()">🔇</span> 
+    <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.3">
+  </div>
+
+  <div class="controls">
+    <button onclick="prevPage()" title="Previous Page">⬅</button>
+    <button onclick="nextPage()" title="Next Page">➜</button>
+  </div>
+
+  <audio id="bg-music" src="photobook_bg_music.mp3" loop></audio>
+
+  <script>
+    const audio = document.getElementById('bg-music');
+    const volumeSlider = document.getElementById('volume-slider');
+    const audioIcon = document.getElementById('audio-icon'); // 🔥 NEW
+    const book = document.getElementById('book');
+    
+    audio.volume = volumeSlider.value; 
+
+    let current = 0;
+    const pages = document.querySelectorAll('.page');
+    const pageTransitionTime = 1800; 
+    let hasPlayed = false;
+    let initialVolume = audio.volume; 
+    let lastVolume = initialVolume; 
+
+    // 🔥 NEW: Function to update the icon based on state
+    function updateIcon() {
+        if (audio.paused) {
+            audioIcon.textContent = '🔇'; // Muted/Paused
+        } else if (audio.volume === 0) {
+            audioIcon.textContent = '🔇'; // Explicitly Muted
+        } else {
+            audioIcon.textContent = '🎶'; // Playing
+        }
+    }
+
+    // 🔥 NEW: Function to toggle mute
+    function toggleMute() {
+        if (audio.volume > 0) {
+            lastVolume = audio.volume; // Save current volume
+            audio.volume = 0;
+            volumeSlider.value = 0;
+        } else {
+            // Restore last known volume, or use the slider value if lastVolume is 0
+            audio.volume = lastVolume > 0 ? lastVolume : 0.3;
+            volumeSlider.value = audio.volume;
+            // If the audio was paused, try to play it (this accounts for the End page being closed)
+            if (audio.paused && current > 0) {
+                 audio.play().catch(error => console.log("Play failed on unmute:", error));
+                 hasPlayed = true; // Ensure flag is set if playback is successful
+            }
+        }
+        updateIcon();
+    }
+
+    // Update icon when slider changes (to handle manual volume to 0)
+    volumeSlider.addEventListener('input', (e) => {
+      audio.volume = e.target.value;
+      initialVolume = audio.volume;
+      lastVolume = audio.volume; // Keep lastVolume synced
+      updateIcon(); // Update icon if volume hits 0
+    });
+
+
+    function fadeOutAndStop() {
+        const fadeDuration = 1000; 
+        const fadeInterval = 50;  
+        const steps = fadeDuration / fadeInterval;
+        let currentStep = 0;
+        
+        initialVolume = audio.volume;
+        
+        const fade = setInterval(() => {
+            currentStep++;
+            const newVolume = initialVolume * (1 - (currentStep / steps));
+            audio.volume = Math.max(0, newVolume);
+
+            if (currentStep >= steps) {
+                clearInterval(fade);
+                audio.pause();
+                audio.currentTime = 0;
+                hasPlayed = false;
+                audio.volume = volumeSlider.value;
+                updateIcon(); // Update icon when music stops
+            }
+        }, fadeInterval);
+    }
+
+    function nextPage() {
+      if (current < pages.length) {
+        pages[current].classList.add('flipped');
+        pages[current].style.zIndex = current;
+        current++;
+
+        if (!hasPlayed) {
+          audio.volume = volumeSlider.value; 
+          audio.play().then(() => {
+            hasPlayed = true;
+            updateIcon(); // Update icon when playback starts
+          }).catch(error => {
+            // Browser autoplay policy: play will fail until user interacts
+            // Just try again on next user interaction
+            hasPlayed = false;
+            updateIcon(); 
+          });
+        } else {
+            updateIcon();
+        }
+      }
+      updateVisibleCaptions();
+    }
+
+    function prevPage() {
+      if (current > 0) {
+        current--;
+        pages[current].classList.remove('flipped');
+        pages[current].style.zIndex = pages.length - current;
+
+        if (current === 0 && hasPlayed) {
+          fadeOutAndStop();
+        }
+      }
+      updateVisibleCaptions();
+    }
+
+    function goToFirstPage() {
+      const flipInterval = setInterval(() => {
+        if (current > 0) {
+          prevPage();
+        } else {
+          clearInterval(flipInterval);
+        }
+      }, 100); 
+    }
+
+    function updateVisibleCaptions() {
+      setTimeout(() => {
+        pages.forEach((page, index) => {
+          const isVisible = index === current || (index === current - 1 && current > 0);
+          if (isVisible) {
+            page.classList.add('visible');
+          } else {
+            page.classList.remove('visible');
+          }
+        });
+      }, pageTransitionTime / 2);
+    }
+
+    // Initialize icon on page load (should show Muted/Paused)
+    updateIcon();
+
+    // Swipe logic remains unchanged
+    let touchstartX = 0;
+    let touchendX = 0;
+
+    function handleSwipe() {
+      const swipeThreshold = 50; 
+      if (touchendX < touchstartX - swipeThreshold) {
+        nextPage();
+      }
+      if (touchendX > touchstartX + swipeThreshold) {
+        prevPage();
+      }
+    }
+
+    book.addEventListener('touchstart', e => {
+      touchstartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    book.addEventListener('touchend', e => {
+      touchendX = e.changedTouches[0].screenX;
+      handleSwipe();
+    });
+
+    updateVisibleCaptions();
+  </script>
+</body>
+</html>

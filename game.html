@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Memory Match Game</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg1: linear-gradient(135deg, #d4b2e8 0%, #e6d4f0 40%, #f9f4fc 100%);
+      --accent: #a259c1;
+      --accent-light: #f3e8ff;
+      --card-bg: #fff;
+      --text-color: #4a2f5a;
+      --shadow: 0 8px 30px rgba(44, 31, 62, 0.12);
+      --radius: 18px;
+      font-family: 'Poppins', 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+    }
+
+    html,body{ height:100%; margin:0; background:var(--bg1); color:var(--text-color); }
+    body{ -webkit-font-smoothing:antialiased; display:flex; align-items:center; justify-content:center; padding:0; position:relative }
+
+    a.home-btn{ position:absolute; top:18px; left:18px; z-index:100; text-decoration:none; color:var(--text-color); background:rgba(255,255,255,0.4); padding:8px 14px; border-radius:20px; font-weight:600 }
+
+    .layout{ width:95%; max-width:1100px; display:grid; grid-template-columns: 300px 1fr; gap:20px; align-items:start; }
+    .sidebar{ background:rgba(255,255,255,0.25); backdrop-filter:blur(10px); padding:20px; border-radius:14px; box-shadow:var(--shadow); display:flex; flex-direction:column; gap:14px }
+    .sidebar h2{ margin:0; font-family:'Playfair Display', serif; font-size:1.6rem; font-weight:700 }
+    .sidebar p{ margin:0; color:#634b70; font-size:0.95rem }
+
+    .board-wrap{ background:transparent; display:flex; align-items:center; justify-content:center; min-height:450px }
+    .memory-grid{ display:grid; gap:var(--grid-gap,1.5vmin); width:clamp(260px,70vmin,700px); height:clamp(260px,70vmin,700px) }
+
+    .memory-card{ position:relative; aspect-ratio:1/1; cursor:pointer; transform-style:preserve-3d; transition:transform 0.5s cubic-bezier(0.2,0.9,0.25,1); border:none; padding:0; background:transparent }
+    .memory-card.flip{ transform:rotateY(180deg) }
+    .memory-card.matched{ pointer-events:none }
+
+    .card-face{ position:absolute; inset:0; display:grid; place-items:center; border-radius:10px; font-size:2.4rem; backface-visibility:hidden; transition:box-shadow 0.25s, background 0.25s }
+    .card-front{ transform:rotateY(180deg); background:#f9f4fc; color:var(--accent) }
+    .card-back{ background:linear-gradient(135deg,#e6d4f0,#d4b2e8); box-shadow:0 4px 10px rgba(0,0,0,0.08) }
+
+    .controls{ display:flex; gap:10px; align-items:flex-end; margin-bottom:4px }
+    select{ padding:8px 10px; border-radius:8px; border:1px solid rgba(74,47,90,0.1); background:#fff; font-size:0.9rem; cursor:pointer }
+    select:focus{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(162,89,193,0.1) }
+
+    .difficulty-options{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:16px }
+    .difficulty-btn{ padding:12px 16px; border-radius:10px; border:2px solid rgba(162,89,193,0.2); background:#fff; color:var(--text-color); cursor:pointer; font-weight:600; transition:all 0.2s; font-size:0.9rem; display:flex; flex-direction:column; align-items:center; gap:4px }
+    .difficulty-btn:hover{ border-color:var(--accent); background:rgba(162,89,193,0.05) }
+    .difficulty-btn.selected{ border-color:var(--accent); background:var(--accent); color:#fff }
+    .difficulty-btn-icon{ font-size:1.4rem }
+    .difficulty-btn-text{ font-size:0.75rem; font-weight:600 }
+    .difficulty-btn-info{ font-size:0.65rem; font-weight:400; opacity:0.8 }
+
+    .btn{ padding:10px 16px; border-radius:10px; border:none; cursor:pointer; font-weight:600; transition: transform 0.2s, box-shadow 0.2s }
+    .btn.pink{ background:var(--accent); color:#fff }
+    .btn.pink:hover{ transform:translateY(-2px); box-shadow:0 4px 12px rgba(162,89,193,0.2) }
+    .btn.ghost{ background:transparent; border:1px solid rgba(74,47,90,0.08); color:var(--text-color) }
+    .btn.ghost:hover{ background:rgba(74,47,90,0.05) }
+
+    .stats{ display:flex; gap:10px; margin-bottom:10px }
+    .stat-box{ flex:1; background:#f9f4fc; padding:10px; border-radius:8px; text-align:center; font-size:0.9rem }
+    .stat-box strong{ display:block; font-size:1.2rem; color:var(--accent) }
+
+    .start-overlay{ position:fixed; inset:0; display:grid; place-items:center; background:rgba(255,255,255,0.08); backdrop-filter:blur(8px); z-index:120; animation:fadeIn 0.4s ease-out }
+    .start-box{ background:rgba(255,255,255,0.6); padding:24px; border-radius:14px; text-align:center; box-shadow:var(--shadow); max-width:320px; animation:slideUp 0.5s cubic-bezier(0.34,1.56,0.64,1) }
+    .start-box h3{ margin:0 0 12px; font-family:'Playfair Display', serif; font-size:1.8rem; color:var(--text-color) }
+    .start-box p{ margin:0 0 16px; color:#634b70 }
+    .start-box-buttons{ display:flex; gap:10px; margin-top:16px }
+
+    @keyframes fadeIn{ from{ opacity:0 } to{ opacity:1 } }
+    @keyframes slideUp{ from{ opacity:0; transform:translateY(30px) } to{ opacity:1; transform:translateY(0) } }
+
+    .win-overlay{ position:fixed; inset:0; display:none; place-items:center; background:rgba(255,255,255,0.92); z-index:200; animation:fadeIn 0.3s ease-out }
+    .win-box{ background:#fff; padding:28px; border-radius:14px; box-shadow:var(--shadow); text-align:center; max-width:360px; animation:slideUp 0.4s cubic-bezier(0.34,1.56,0.64,1) }
+    .win-box h2{ margin:0 0 12px; font-family:'Playfair Display', serif; font-size:2rem; color:var(--text-color) }
+    .win-box p{ margin:0 0 16px; color:#634b70; font-size:0.95rem }
+
+    .sound-toggle{ position:fixed; top:18px; right:18px; z-index:120; width:48px; height:48px; border-radius:50%; display:grid; place-items:center; background:rgba(255,255,255,0.4); border:1px solid rgba(74,47,90,0.08); cursor:pointer; font-size:1.3rem; transition: background 0.2s, transform 0.2s }
+    .sound-toggle:hover{ background:rgba(255,255,255,0.8); transform:scale(1.08) }
+
+    @media (max-width:900px){
+      .layout{ grid-template-columns: 1fr; }
+      .memory-grid{ grid-template-columns: repeat(4,1fr); width:90vw; height:90vw }
+      .sidebar{ grid-column:1; }
+      .board-wrap{ grid-column:1; }
+    }
+  </style>
+</head>
+<body>
+  <a class="home-btn" href="letter.html">✮ ⋆ ˚｡Back ⋆｡°✩</a>
+  <button class="sound-toggle" id="soundToggle" aria-label="Toggle sound">🔊</button>
+
+  <div class="layout" role="application">
+    <aside class="sidebar">
+      <div>
+        <h2>Memory Match</h2>
+        <p id="desc">Find all matching pairs before time runs out.</p>
+      </div>
+
+      <div class="controls">
+        <button id="restartBtn" class="btn pink" type="button" style="margin-bottom:0; flex:1">Restart Game</button>
+      </div>
+
+      <div style="margin-top:8px">
+        <p style="margin:0 0 8px; font-size:0.9rem; color:#6e527a; font-weight:600">Difficulty: <span id="difficultyLabel">Medium</span></p>
+        <div style="display:flex; gap:8px; margin-bottom:8px; font-weight:600">
+          <div><span id="moves">0</span> Moves</div>
+          <div style="margin-left:auto"><span id="timer">60</span>s Left</div>
+        </div>
+        <div class="stats">
+          <div class="stat-box">Best Moves<div id="bestMoves">--</div></div>
+          <div class="stat-box">Best Time<div id="bestTime">--s</div></div>
+        </div>
+      </div>
+      <p style="margin:8px 0 0; color:#6e527a; font-size:0.9rem" id="long-desc">Good luck! 💜</p>
+    </aside>
+
+    <section class="board-wrap">
+      <div class="memory-grid" id="grid" role="grid" aria-label="Memory cards"></div>
+    </section>
+  </div>
+
+  <div class="start-overlay" id="startOverlay">
+    <div class="start-box">
+      <h3>Memory Match Game</h3>
+      <p style="color:#634b70; margin:0 0 16px; font-size:0.95rem">Test your memory by finding all matching pairs! The faster you match them, the better your score. Choose your difficulty level and challenge yourself.</p>
+      <div style="margin-bottom:16px">
+        <label style="display:block; font-size:0.85rem; margin-bottom:10px; color:#634b70; font-weight:600">Select Difficulty</label>
+        <div class="difficulty-options">
+          <button type="button" class="difficulty-btn selected" data-difficulty="easy"><span class="difficulty-btn-text">Easy</span><span class="difficulty-btn-info">3x4 • 45s</span></button>
+          <button type="button" class="difficulty-btn" data-difficulty="medium"><span class="difficulty-btn-text">Medium</span><span class="difficulty-btn-info">4x4 • 60s</span></button>
+          <button type="button" class="difficulty-btn" data-difficulty="hard"><span class="difficulty-btn-text">Hard</span><span class="difficulty-btn-info">5x4 • 75s</span></button>
+        </div>
+        <select id="difficulty" aria-label="Select difficulty" style="display:none">
+          <option value="easy" selected>Easy</option>
+          <option value="medium">Medium</option>
+          <option value="hard">Hard</option>
+        </select>
+      </div>
+      <p style="color:#634b70; margin:0 0 16px; font-size:0.9rem">Press Start to begin!</p>
+      <div class="start-box-buttons">
+        <button id="startModalBtn" class="btn pink" type="button" style="flex:1">Start Game</button>
+        <button id="backBtn" class="btn ghost" type="button" style="flex:1">Back</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="win-overlay" id="winOverlay">
+    <div class="win-box">
+      <h2 id="winText">You Win! 🎉</h2>
+      <p id="winStats"></p>
+      <div style="display:flex; gap:10px; margin-top:16px">
+        <button id="playAgain" class="btn pink" type="button" style="flex:1">Play Again</button>
+        <button id="winBackBtn" class="btn ghost" type="button" style="flex:1">Back</button>
+      </div>
+    </div>
+  </div>
+
+  <audio id="flipSound" src="sound effect/flip.mp3" preload="auto"></audio>
+  <audio id="matchSound" src="sound effect/matched.mp3" preload="auto"></audio>
+  <audio id="winSound" src="sound effect/winner.mp3" preload="auto"></audio>
+
+  <script>
+    const grid = document.getElementById('grid');
+    const restartBtn = document.getElementById('restartBtn');
+    const startModalBtn = document.getElementById('startModalBtn');
+    const startOverlay = document.getElementById('startOverlay');
+    const difficultySel = document.getElementById('difficulty');
+    const movesEl = document.getElementById('moves');
+    const timerEl = document.getElementById('timer');
+    const bestMovesEl = document.getElementById('bestMoves');
+    const bestTimeEl = document.getElementById('bestTime');
+    const winOverlay = document.getElementById('winOverlay');
+    const winText = document.getElementById('winText');
+    const winStats = document.getElementById('winStats');
+    const playAgain = document.getElementById('playAgain');
+    const soundToggle = document.getElementById('soundToggle');
+    const backBtn = document.getElementById('backBtn');
+    const winBackBtn = document.getElementById('winBackBtn');
+    const difficultyLabel = document.getElementById('difficultyLabel');
+
+    const flipSound = document.getElementById('flipSound');
+    const matchSound = document.getElementById('matchSound');
+    const winSound = document.getElementById('winSound');
+
+    const ICONS = ['❤️','⭐','🎁','💌','💍','🎶','💖','✨','🎈','🎉','🥂','👑'];
+    const DIFFICULTY = {
+      easy:{pairs:6,cols:3,time:45},
+      medium:{pairs:8,cols:4,time:60},
+      hard:{pairs:10,cols:5,time:75}
+    };
+
+    let cards = [], flipped = [], matched = 0, moves = 0, timer = null, timeLeft = 60, isMuted = false;
+    const BEST_MOVES_KEY = 'memBestMoves';
+    const BEST_TIME_KEY = 'memBestTime';
+
+    function loadBest(){
+      const bm = localStorage.getItem(BEST_MOVES_KEY);
+      bestMovesEl.textContent = bm || '--';
+      const bt = localStorage.getItem(BEST_TIME_KEY);
+      bestTimeEl.textContent = bt ? bt+'s' : '--s';
+    }
+
+    function shuffle(a){ return a.sort(() => Math.random() - 0.5); }
+
+    function buildBoard(){
+      const d = difficultySel.value;
+      const cfg = DIFFICULTY[d];
+      const diffNames = { easy: 'Easy', medium: 'Medium', hard: 'Hard' };
+      difficultyLabel.textContent = diffNames[d];
+      const icons = ICONS.slice(0, cfg.pairs);
+      let deck = [...icons, ...icons];
+      shuffle(deck);
+
+      grid.innerHTML = '';
+      grid.style.gridTemplateColumns = `repeat(${cfg.cols}, 1fr)`;
+      grid.style.setProperty('--grid-gap', cfg.cols >= 5 ? '1vmin' : '1.5vmin');
+      
+      // Adjust grid size based on difficulty to keep cards properly sized
+      if(cfg.cols === 3) grid.style.width = '450px';
+      else if(cfg.cols === 4) grid.style.width = 'clamp(260px,70vmin,700px)';
+      else grid.style.width = 'clamp(260px,70vmin,700px)';
+
+      cards = [];
+      matched = 0;
+      moves = 0;
+      updateMoves();
+
+      deck.forEach((icon) => {
+        const card = document.createElement('button');
+        card.className = 'memory-card';
+        card.type = 'button';
+        card.setAttribute('aria-label', 'card');
+        card.innerHTML = `<div class="card-face card-back"></div><div class="card-face card-front">${icon}</div>`;
+        card.dataset.icon = icon;
+        card.addEventListener('click', onCard);
+        grid.appendChild(card);
+        cards.push(card);
+      });
+
+      timeLeft = cfg.time;
+      timerEl.textContent = timeLeft;
+    }
+
+    function onCard(e){
+      const btn = e.currentTarget;
+      if(btn.classList.contains('flip') || btn.classList.contains('matched') || flipped.length === 2) return;
+      play(flipSound);
+      btn.classList.add('flip');
+      flipped.push(btn);
+      if(flipped.length === 2){
+        moves++;
+        updateMoves();
+        checkMatch();
+      }
+    }
+
+    function checkMatch(){
+      const [a, b] = flipped;
+      if(a.dataset.icon === b.dataset.icon){
+        a.classList.add('matched');
+        b.classList.add('matched');
+        matched++;
+        play(matchSound);
+        flipped = [];
+        if(matched === cards.length / 2) win();
+      } else {
+        setTimeout(() => {
+          a.classList.remove('flip');
+          b.classList.remove('flip');
+          flipped = [];
+        }, 500);
+      }
+    }
+
+    function updateMoves(){ movesEl.textContent = moves; }
+
+    function startTimer(){
+      clearInterval(timer);
+      timer = setInterval(() => {
+        timeLeft--;
+        timerEl.textContent = timeLeft;
+        if(timeLeft <= 10) timerEl.style.color = 'red';
+        else timerEl.style.color = '';
+        if(timeLeft <= 0){ clearInterval(timer); lose(); }
+      }, 1000);
+    }
+
+    function stopTimer(){ clearInterval(timer); }
+
+    function win(){
+      stopTimer();
+      play(winSound);
+      const elapsed = DIFFICULTY[difficultySel.value].time - timeLeft;
+      winText.textContent = 'You Win! 🎉';
+      winStats.textContent = `Finished in ${elapsed}s with ${moves} moves.`;
+      winOverlay.style.display = 'grid';
+
+      const prevMoves = parseInt(localStorage.getItem(BEST_MOVES_KEY)) || Infinity;
+      if(moves < prevMoves) localStorage.setItem(BEST_MOVES_KEY, moves);
+      const prevTime = parseInt(localStorage.getItem(BEST_TIME_KEY)) || Infinity;
+      if(elapsed < prevTime) localStorage.setItem(BEST_TIME_KEY, elapsed);
+      loadBest();
+    }
+
+    function lose(){
+      winText.textContent = "Time's Up! ⏰";
+      winStats.textContent = `You matched ${matched} pairs with ${moves} moves.`;
+      winOverlay.style.display = 'grid';
+    }
+
+    function play(audio){
+      if(!audio) return;
+      if(!isMuted){
+        audio.currentTime = 0;
+        audio.play().catch(() => {});
+      }
+    }
+
+    // Difficulty button handlers
+    document.querySelectorAll('.difficulty-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        difficultySel.value = btn.dataset.difficulty;
+      });
+    });
+
+    restartBtn.addEventListener('click', () => {
+      buildBoard();
+      startTimer();
+    });
+    startModalBtn.addEventListener('click', () => {
+      startOverlay.style.display = 'none';
+      buildBoard();
+      startTimer();
+    });
+    playAgain.addEventListener('click', () => {
+      winOverlay.style.display = 'none';
+      buildBoard();
+      startTimer();
+    });
+
+    soundToggle.addEventListener('click', () => {
+      isMuted = !isMuted;
+      soundToggle.textContent = isMuted ? '🔇' : '🔊';
+      if(!isMuted) play(matchSound);
+    });
+
+    difficultySel.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter'){
+        startOverlay.style.display = 'none';
+        buildBoard();
+        startTimer();
+      }
+    });
+
+    backBtn.addEventListener('click', () => {
+      window.location.href = 'letter.html';
+    });
+
+    winBackBtn.addEventListener('click', () => {
+      window.location.href = 'letter.html';
+    });
+
+    loadBest();
+    buildBoard();
+    startOverlay.style.display = 'grid';
+  </script>
+</body>
+</html>

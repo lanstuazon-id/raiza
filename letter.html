@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>For Raiza ❤️</title>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg1: radial-gradient(circle, #f9f4fc 0%, #e6d4f0 60%, #d4b2e8 100%);
+      --accent: #c390da;
+      --card: rgba(255, 255, 255, 0.85);
+      --glass: rgba(255, 255, 255, 0.4);
+      --shadow: 0 8px 30px rgba(44, 31, 62, 0.12);
+      --radius: 18px;
+      font-family: 'Segoe UI', Roboto, system-ui, -apple-system, 'Helvetica Neue', Arial;
+    }
+
+    html,body{
+      height:100%;
+      margin:0;
+      background: var(--bg1);
+      border-radius: 30px;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:2rem;
+      box-sizing: border-box;
+    }
+
+    .container{
+      width:min(980px,96vw);
+      display:grid;
+      grid-template-columns: 1fr 380px;
+      gap:28px;
+      align-items:stretch;
+    }
+
+    .card{
+      background: var(--glass);
+      border-radius:var(--radius);
+      padding:28px;
+      box-shadow:var(--shadow);
+      position:relative;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+    }
+
+    .title{
+      display:flex;
+      gap:16px;
+      align-items:center;
+    }
+
+    .heart{
+      width:72px;height:72px;border-radius:18px;
+      background: conic-gradient(from 120deg at 50% 50%, #c391e0, var(--accent) 60%);
+      display:grid;place-items:center;color:white;font-weight:700;font-size:28px;
+      box-shadow:0 8px 20px rgba(162, 89, 193, 0.2);
+      transform:rotate(-12deg);
+      animation: float 4s ease-in-out infinite;
+    }
+
+    @keyframes float{
+      0%{ transform:translateY(0) rotate(-12deg)}
+      50%{ transform:translateY(-8px) rotate(-8deg)}
+      100%{ transform:translateY(0) rotate(-12deg)}
+    }
+
+    h1{
+      margin:0;font-size:2rem;color:#4a2f5a;
+      letter-spacing: -0.02em;
+    }
+
+    p.lead{ margin:12px 0 18px;color:#634b70;opacity:0.95;line-height:1.45;font-size:1rem; }
+
+    .message{
+      background: linear-gradient(180deg, rgba(255,255,255,0.5), rgba(255,255,255,0.35));
+      border-radius:12px;padding:16px;margin-top:12px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.6);
+    }
+
+    .small-cta{display:flex;gap:12px;margin-top:18px}
+    .btn{position:relative;overflow:hidden;padding:10px 14px;border-radius:12px;border:0;cursor:pointer;font-weight:600}
+    .btn{transition: transform .2s ease, box-shadow .2s ease;}
+    .btn:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.08)}
+    .btn:active{transform:translateY(0) scale(0.96);box-shadow:none}
+    .btn.pink{background:var(--accent);color:white}
+    .btn.pink:hover{box-shadow:0 4px 12px rgba(162, 89, 193, 0.2)}
+    .btn.ghost{background:transparent;border:1px solid rgba(74, 47, 90, 0.1);color:#4a2f5a}
+
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      background-color: rgba(255, 255, 255, 0.6);
+      transform: scale(0);
+      animation: ripple-effect 0.6s linear;
+      pointer-events: none;
+    }
+    @keyframes ripple-effect {
+      to {
+        transform: scale(4);
+        opacity: 0;
+      }
+    }
+
+    .photo-frame{width:64px;height:64px;border-radius:12px;background:linear-gradient(180deg,#fff,#ffeef6);padding:0;overflow:hidden;border:2px solid white;box-shadow:0 4px 10px rgba(0,0,0,0.05)}
+
+    .side{
+      align-self:start;display:flex;flex-direction:column;gap:18px;
+    }
+
+    .mini-card{
+      background:var(--glass);backdrop-filter: blur(6px);
+      border-radius:14px;padding:18px;box-shadow:var(--shadow);
+    }
+
+    .name-big{font-size:1.6rem;margin:0;color:#4a2f5a}
+    .nick{color:#754f8a;font-weight:700;margin-left:6px}
+
+    .stats{display:flex;gap:10px;margin-top:10px}
+    .stat{flex:1;background:rgba(255,255,255,0.6);padding:10px;border-radius:10px;text-align:center; animation: pulse 3.5s infinite ease-in-out;}
+    .stat strong{display:block;font-size:18px}
+    .stat span{font-size:12px;color:#634b70}
+    .stats .stat:nth-child(2){animation-delay: 0.3s;}
+    .stats .stat:nth-child(3){animation-delay: 0.6s;}
+
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+        box-shadow: none;
+      }
+      50% {
+        transform: scale(1.05);
+        box-shadow: 0 4px 16px rgba(162, 89, 193, 0.18);
+      }
+    }
+
+    .notes{display:flex;flex-direction:column;gap:10px}
+    .note{background:linear-gradient(90deg, rgba(255,255,255,0.7), rgba(255,255,255,0.55));padding:12px;border-radius:12px;transition: transform .2s ease, box-shadow .2s ease;cursor:default;}
+    .note:hover{transform:translateY(-3px);box-shadow:0 6px 16px rgba(0,0,0,0.07)}
+
+    .explore-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .explore-grid .btn {
+      height: 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    footer{margin-top:18px;font-size:13px;color:#634b70;opacity:0.9}
+
+    .bg-hearts{position:absolute;inset:0;pointer-events:none;opacity:0.18}
+    .bg-hearts i{position:absolute;font-style:normal;font-size:38px;animation: float-bg 15s infinite}
+    @keyframes float-bg{
+      0%{transform:translateY(0) rotate(0);opacity:0.8}
+      50%{transform:translateY(-80px) rotate(20deg);opacity:0.2}
+      100%{transform:translateY(0) rotate(0);opacity:0.8}
+    }
+    .bg-hearts i:nth-child(2){animation-delay: 4s; animation-duration: 20s;}
+    .bg-hearts i:nth-child(3){animation-delay: 8s; animation-duration: 12s;}
+
+    .bg-hearts i.h1{top:10%;left:5%}
+    .bg-hearts i.h2{top:40%;right:6%}
+    .bg-hearts i.h3{bottom:8%;left:20%}
+
+    @media (max-width:880px){
+      .container{grid-template-columns:1fr;}
+      .heart{width:60px;height:60px}
+      body{padding: 1rem;}
+      h1{font-size: 1.8rem;}
+      .card{padding: 20px;}
+    }
+
+    .signature {
+      font-family: 'Caveat', cursive;
+      font-size: 1.6rem;
+      font-weight: 500;
+      color: var(--accent);
+    }
+
+    .reveal{opacity:0;transform:translateY(8px);animation: reveal .6s forwards}
+    .reveal.delay{animation-delay:.18s}
+    @keyframes reveal{to{opacity:1;transform:none}}
+
+    /* Mood Slider Styles */
+    .mood-slider-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.5rem;
+    }
+    .mood-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 8px;
+      background: linear-gradient(90deg, #f9f4fc, #e6d4f0);
+      border-radius: 4px;
+      outline: none;
+      opacity: 0.8;
+      transition: opacity .2s;
+    }
+    .mood-slider:hover {
+      opacity: 1;
+    }
+    .mood-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 22px;
+      height: 22px;
+      background: var(--accent);
+      border-radius: 50%;
+      cursor: pointer;
+      border: 4px solid white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .mood-slider::-moz-range-thumb {
+      width: 14px;
+      height: 14px;
+      background: var(--accent);
+      border-radius: 50%;
+      cursor: pointer;
+      border: 4px solid white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+    #surprise {
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    #surprise.visible {
+      max-height: 100px;
+      opacity: 1;
+      transform: translateY(0);
+      margin-top: 16px;
+    }
+    
+    @keyframes photo-bounce {
+      0%   { transform: translateX(-50%) translateY(-50px); }
+      60%  { transform: translateX(-50%) translateY(10px); }
+      80%  { transform: translateX(-50%) translateY(-5px); }
+      100% { transform: translateX(-50%) translateY(0); }
+    }
+  </style>
+  <style>
+    #surprise-image {
+      position: fixed;
+      bottom: -100vh;
+      right: 25%;
+      transform: translateX(50%);
+      width: clamp(250px, 40vw, 320px);
+      border-radius: 16px;
+      transition: bottom 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+      z-index: 9998;
+      pointer-events: none;
+    }
+
+    #surprise-image.visible {
+      bottom: 0px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <main class="card reveal">
+      <div class="title" style="padding-bottom: 8px;">
+        <div class="heart">🌷</div>
+        <div>
+          <h1>Ria's App</h1>
+          <p class="lead">⋆𐙚₊˚⊹♡⋆𐙚₊˚⊹♡⋆𐙚₊˚⊹♡⋆𐙚₊˚⊹♡⋆𐙚₊˚⊹♡⋆𐙚₊˚⊹♡⋆𐙚₊˚⊹♡⋆𐙚₊˚⊹♡⋆𐙚₊˚⊹♡</p>
+        </div>
+      </div>
+
+      <div class="message">
+        <p>Hi <strong>Babi</strong>,</p>
+        <p>I made this little corner for comfort or whatever and also to remind you how special you are. Every time you open this app, think of a warm hug, a silly laugh, and the sweetest memories. hoping u will like this app i made for u po. ilysm!</p>
+        <p style="margin:0.6rem 0 0;">love, <span class="signature">your baby lans pogi</span></p>
+      </div>
+
+      <div style="display:flex;gap:14px;align-items:center;justify-content:space-between;margin-top:20px;">
+        <div style="display:flex;gap:12px;align-items:center">
+          <button class="btn pink" onclick="sendTulip()">Send a Tulip</button>
+          <button class="btn ghost" onclick="toggleNote()" style="min-width: 120px;">Surprise Note</button>
+        </div>
+        <button class="btn pink" onclick="openPhotobooth()" style="min-width: 120px;">Photo Booth</button>
+      </div>
+
+      <div id="surprise">
+        <div class="note">u make my days brighter — a flower for u. 🌷</div>
+      </div>
+
+      <div style="height:12px"></div>
+      <footer>Tip: press "Send a Tulip" to make things extra cute ✨</footer>
+
+      <div class="bg-hearts" aria-hidden="true">
+        <i class="h1">🌷</i>
+        <i class="h2">🌷</i>
+        <i class="h3">🌷</i>
+      </div>
+    </main>
+
+    <aside class="side">
+      <div class="mini-card reveal delay">
+        <div style="display:flex;align-items:center;gap:12px;justify-content:space-between">
+          <div style="display:flex;align-items:center;gap:12px;flex:1">
+            <div class="photo-frame">
+              <img src="100_0645.JPEG" alt="Profile Picture" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+            <div>
+              <div class="name-big">Ria <span class="nick"></span></div>
+              <div style="font-size:13px;color:#634b70;margin-top:6px">My Goldie. Sungit. Forever fave.</div>
+            </div>
+          </div>
+          <button class="btn pink" onclick="takePhoto()" style="white-space:nowrap;flex-shrink:0">(˶ᵔ ᵕ ᵔ˶)</button>
+        </div>
+
+        <div class="stats">
+          <div class="stat"><strong>∞</strong><span>Hugs</span></div>
+          <div class="stat"><strong>100%</strong><span>Love</span></div>
+          <div class="stat"><strong>1</strong><span>Only you</span></div>
+        </div>
+      </div>
+
+      <div class="mini-card reveal delay">
+        <h3 style="margin:0 0 12px 0;color:#4a2f5a">More to Explore</h3>
+        <div class="explore-grid">
+          <button class="btn pink" onclick="openPhotobook()">📖<br>Photobook</button>
+          <button class="btn pink" onclick="openMemoryBubble()">🫧<br>Memory Bubble</button>
+          <button class="btn pink" onclick="openMoodify()">🙂<br>Moodify</button>
+          <button class="btn pink" onclick="openGame()">🎮<br>Game</button>
+        </div>
+      </div>
+
+      <div class="mini-card reveal delay">
+        <h3 style="margin:0 0 12px 0;color:#4a2f5a">How's your mood today?</h3>
+        <div class="mood-slider-container">
+          <span>😔</span>
+          <input type="range" id="mood-slider-input" min="0" max="100" value="50" class="mood-slider" oninput="handleMoodChange(this)">
+          <span>😊</span>
+        </div>
+        <p id="mood-message" style="text-align: center; font-size: 0.8rem; color: #634b70; margin: 8px 0 0;">Let me know how you're feeling!</p>
+      </div>
+    </aside>
+  </div>
+
+<img id="surprise-image" 
+  src="holding tulip.png" 
+  alt="A cute surprise image of us"
+>
+
+<img id="photo-strip" src="photostrip.jpg" 
+  style="
+    position: fixed;
+    top: -700px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+  ">
+<audio id="shutter-sound" src="sound effect/printing sound.mp3"></audio>
+
+  <script>
+    function toggleNote(){
+      const surpriseEl = document.getElementById('surprise');
+      const surpriseImageEl = document.getElementById('surprise-image');
+      surpriseEl.classList.toggle('visible');
+      surpriseImageEl.classList.toggle('visible');
+
+      if (surpriseEl.classList.contains('visible')) {
+        setTimeout(() => {
+          surpriseEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 150);
+      }
+    }
+
+    function openPhotobook() {
+      window.location.href = 'photobook.html';
+    }
+
+    function openGame() {
+      window.location.href = 'game.html';
+    }
+
+    function openMemoryBubble() {
+      window.location.href = 'memorybubble.html';
+    }
+
+    function openMoodify() {
+      window.location.href = 'Moodify.html';
+    }
+
+    function handleMoodChange(slider) {
+      const value = parseInt(slider.value);
+      const messageEl = document.getElementById('mood-message');
+
+      slider.style.background = `linear-gradient(90deg, #e6d4f0 ${value}%, #f9f4fc ${value}%)`;
+
+      if (value < 30) {
+        messageEl.textContent = "'wag na po u sad, sending you hugs and kisses. 🤗";
+      } else if (value < 70) {
+        messageEl.textContent = "hope you're having a great day po!.";
+      } else {
+        messageEl.textContent = "good to know that you're happy!. ❤️";
+      }
+    }
+
+    function sendTulip(){
+      const heart = document.createElement('div');
+      heart.textContent = '🌷';
+      heart.style.position='fixed';
+      heart.style.left = (20 + Math.random()*60) + '%';
+      heart.style.top = (20 + Math.random()*60) + '%';
+      heart.style.fontSize = (18 + Math.random()*30) + 'px';
+      heart.style.opacity = 1;
+      heart.style.pointerEvents='none';
+      heart.style.transform = 'translateY(0) rotate('+ (Math.random()*40-20) +'deg)';
+      document.body.appendChild(heart);
+      const travel = 80 + Math.random()*60;
+      const dur = 1800 + Math.random()*1200;
+      heart.animate([
+        { transform: heart.style.transform + ' translateY(0)', opacity:1 },
+        { transform: heart.style.transform + ' translateY(-'+travel+'px)', opacity:0 }
+      ],{duration:dur, easing:'cubic-bezier(.2,.8,.3,1)'}).onfinish = ()=> heart.remove();
+    }
+
+    (function placeBg(){
+      const items = document.querySelectorAll('.bg-hearts i');
+      items.forEach((it,idx)=>{
+        const left = Math.random()*80; const top = Math.random()*80;
+        it.style.left = left + '%'; it.style.top = top + '%';
+        it.style.opacity = 0.2 + Math.random()*0.6;
+        it.style.fontSize = (20 + Math.random()*40) + 'px';
+      })
+    })();
+
+    document.querySelectorAll('.btn').forEach(button => {
+      button.addEventListener('click', function (e) {
+        const rect = button.getBoundingClientRect();
+        const ripple = document.createElement('span');
+        const size = Math.max(button.clientWidth, button.clientHeight);
+        const x = e.clientX - rect.left - size / 2;
+        const y = e.clientY - rect.top - size / 2;
+
+        ripple.style.width = ripple.style.height = `${size}px`;
+        ripple.style.left = `${x}px`;
+        ripple.style.top = `${y}px`;
+        ripple.classList.add('ripple');
+
+        if (button.classList.contains('pink')) {
+          ripple.style.backgroundColor = 'rgba(255, 255, 255, 0.4)';
+        }
+
+        button.appendChild(ripple);
+        ripple.addEventListener('animationend', () => ripple.remove());
+      });
+    });
+
+function takePhoto() {
+  const strip = document.getElementById('photo-strip');
+  const sound = document.getElementById('shutter-sound');
+
+  // Play shutter sound
+  sound.currentTime = 0;
+  sound.play();
+
+  // Reset state
+  strip.style.transition = "none";
+  strip.style.top = "-300px";
+  strip.style.opacity = "0";
+  strip.style.animation = "none";
+  strip.offsetHeight; // force reflow
+
+  // Slide down + fade in
+  strip.style.transition = "top 3s ease-out, opacity 3s ease-out";
+  strip.style.top = "50px";
+  strip.style.opacity = "1";
+
+  // Add bounce after it slides down
+  setTimeout(() => {
+    strip.style.transition = "none"; // remove transition to use keyframes
+    strip.style.animation = "photo-bounce 1s ease forwards";
+  }, 1200); // after slide down completes
+
+  // Slide up + fade out after 3 seconds
+  setTimeout(() => {
+    strip.style.transition = "top 2.5s ease-in, opacity 2.5s ease-in";
+    strip.style.top = "-300px";
+    strip.style.opacity = "0";
+    strip.style.animation = "none"; // remove bounce animation
+  }, 3500); // 0.8s down + 0.5s bounce + ~2s pause
+}
+
+function openPhotobooth() {
+  window.location.href = 'photobooth.html';
+}
+  </script>
+</body>
+</html>

@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Moodify 🎶</title>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,500&display=swap" rel="stylesheet">
+    
+    <style>
+    
+    body {
+  opacity: 0;
+  animation: fadeZoomGlow 1.5s ease forwards;
+}
+
+@keyframes fadeZoomGlow {
+  0% {
+    opacity: 0;
+    transform: scale(0.97);
+    box-shadow: 0 0 0px rgba(255, 200, 255, 0);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.02);
+    box-shadow: 0 0 40px rgba(255, 200, 255, 0.3);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 20px rgba(255, 200, 255, 0.2);
+  }
+}
+        
+        body {
+          --bg1: radial-gradient(circle, #f9f4fc 0%, #e6d4f0 60%, #d4b2e8 100%);
+          --accent: #a259c1;
+          --card: rgba(255, 255, 255, 0.85);
+          --glass: rgba(255, 255, 255, 0.4);
+          --shadow: 0 8px 30px rgba(44, 31, 62, 0.12);
+          --radius: 18px;
+          --text-color: #4a2f5a;
+          font-family: 'Segoe UI', Roboto, system-ui, -apple-system, 'Helvetica Neue', Arial;
+          
+          /* Full-Page Centering styles remain here */
+          height:100%;
+          margin:0;
+          background: var(--bg1);
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          padding:2rem;
+          box-sizing: border-box;
+          text-align: center;
+          overflow: hidden;
+        }
+
+        /* HTML tag needed just to ensure full height for body */
+        html {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* Main Content Container */
+        .moodify-container {
+            width: min(700px, 96vw);
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 { color: var(--text-color); margin-bottom: 5px; }
+        p { color: #634b70; }
+
+        .back-button-container {
+            position: fixed; /* Fixed position relative to viewport */
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+        }
+
+        .btn.ghost {
+             color: var(--text-color);
+             text-decoration: none;
+             font-weight: 600;
+             background: rgba(255,255,255,0.4);
+             padding: 8px 14px;
+             border-radius: 20px;
+             border: none;
+             cursor: pointer;
+             transition: background 0.2s ease;
+        }
+        .btn.ghost:hover {
+            background: rgba(255,255,255,0.6);
+        }
+
+        /* Mood Selector Grid (unchanged, but now holds more) */
+        .mood-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 15px;
+            margin: 25px 0 40px;
+            width: 100%;
+            max-width: 600px;
+        }
+        
+        .mood-btn {
+            background: var(--glass);
+            border: 1px solid rgba(74, 47, 90, 0.1);
+            color: var(--text-color);
+            padding: 15px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 600;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 80px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .mood-btn span.emoji {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            line-height: 1;
+        }
+        .mood-btn span.label {
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .mood-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(162, 89, 193, 0.15);
+        }
+        .mood-btn.active {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 4px 12px rgba(162, 89, 193, 0.4);
+        }
+        .mood-btn.active span.label {
+            color: white;
+        }
+        
+        /* ------------------------------------- */
+        /* --- FLOATING MODAL PLAYER STYLES --- */
+        /* ------------------------------------- */
+
+        /* Modal Background Overlay (unchanged) */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(44, 31, 62, 0.4);
+            backdrop-filter: blur(4px);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+        .modal-overlay.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Modal Player Card (unchanged) */
+        .player-area {
+            position: relative;
+            width: min(90%, 400px);
+            padding: 30px;
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transform: translateY(100vh); 
+            transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .modal-overlay.visible .player-area {
+            transform: translateY(0);
+        }
+
+        /* Close Button (unchanged) */
+        .close-btn {
+            position: absolute;
+            top: 10px; right: 10px;
+            background: rgba(0,0,0,0.1);
+            color: var(--text-color);
+            border: none;
+            border-radius: 50%;
+            width: 30px; height: 30px;
+            line-height: 30px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .close-btn:hover {
+            background: rgba(0,0,0,0.2);
+        }
+        
+        /* Vinyl Disc Styling (unchanged) */
+        .vinyl-disc {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: #222;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: all 0.5s ease-out;
+            margin-bottom: 25px;
+            overflow: hidden;
+            border: 8px solid #333;
+        }
+        
+        /* *** NEW CSS ADDED HERE *** */
+        #album-cover {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Ensures the image covers the area without distortion */
+            border-radius: 50%; /* Keeps the image circular */
+        }
+        /* ************************** */
+
+        .vinyl-disc::before {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--accent);
+            z-index: 10;
+            border: 5px solid white;
+        }
+
+        .vinyl-disc.playing {
+            animation: spin 3s infinite linear;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Song Info (unchanged) */
+        #song-title {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: 1.8rem;
+            color: var(--text-color);
+            margin-bottom: 5px;
+        }
+        #song-message {
+            color: #634b70;
+            margin-bottom: 20px;
+        }
+
+        /* ------------------------------------- */
+        /* --- CUSTOM CONTROLS STYLING --- */
+        /* ------------------------------------- */
+
+        /* Hide the default audio controls */
+        #audio-player { display: none; } 
+
+        #custom-controls {
+            width: 100%;
+            max-width: 300px; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        /* Play/Pause Button (unchanged) */
+        #play-pause-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 12px rgba(162, 89, 193, 0.4);
+        }
+        #play-pause-btn:active { transform: scale(0.95); }
+
+        /* Progress Bar / Time Slider Container */
+        .progress-container {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        /* Volume Slider Container */
+        .volume-container {
+            width: 100%;
+            max-width: 250px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .volume-container span {
+            color: #634b70;
+            font-size: 1.1rem;
+        }
+
+        /* Custom Slider Input (Applied to both progress and volume sliders) */
+        #audio-slider, #volume-slider {
+            flex-grow: 1;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            border-radius: 5px;
+            cursor: pointer;
+            outline: none;
+            transition: background 0.2s;
+        }
+        
+        /* Making the slider tracks the accent color */
+        #audio-slider { background: var(--accent); }
+        #volume-slider { background: var(--accent); }
+        
+        /* Custom Slider Thumb (Applied to both progress and volume sliders) */
+        #audio-slider::-webkit-slider-thumb, #volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--accent); /* Thumb color */
+            cursor: pointer;
+            box-shadow: 0 0 2px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="back-button-container">
+        <button class="btn ghost" onclick="window.location.href='letter.html'">✮ ⋆ ˚｡Back ⋆｡°✩</button>
+    </div>
+
+    <div class="moodify-container">
+        
+        <h1>Moodify 🎧</h1>
+        <p id="main-prompt">Select a mood card to find the perfect Ariana Grande song for how you feel. 🌷</p>
+
+        <div class="mood-selector" id="mood-selector">
+            <button class="mood-btn" data-mood="calm"><span class="emoji">😌</span><span class="label">Calm</span></button>
+            <button class="mood-btn" data-mood="happy"><span class="emoji">😄</span><span class="label">Happy</span></button>
+            <button class="mood-btn" data-mood="sad"><span class="emoji">😔</span><span class="label">Sad</span></button>
+            <button class="mood-btn" data-mood="cozy"><span class="emoji">🏡</span><span class="label">Cozy</span></button>
+            <button class="mood-btn" data-mood="confident"><span class="emoji">💅</span><span class="label">Confident</span></button>
+            <button class="mood-btn" data-mood="flirty"><span class="emoji">😉</span><span class="label">Flirty</span></button>
+            <button class="mood-btn" data-mood="energetic"><span class="emoji">⚡</span><span class="label">Energetic</span></button>
+            <button class="mood-btn" data-mood="comforted"><span class="emoji">🫂</span><span class="label">Comforted</span></button>
+            <button class="mood-btn" data-mood="inspired"><span class="emoji">💡</span><span class="label">Inspired</span></button>
+            <button class="mood-btn" data-mood="nostalgic"><span class="emoji">🕰️</span><span class="label">Nostalgic</span></button>
+            <button class="mood-btn" data-mood="chill"><span class="emoji">🧊</span><span class="label">Chill</span></button>
+            <button class="mood-btn" data-mood="ambitious"><span class="emoji">👑</span><span class="label">Ambitious</span></button>
+            <button class="mood-btn" data-mood="manifest"><span class="emoji">✨</span><span class="label">Manifest</span></button>
+            <button class="mood-btn" data-mood="vulnerable"><span class="emoji">🥺</span><span class="label">Vulnerable</span></button>
+            <button class="mood-btn" data-mood="silly"><span class="emoji">😝</span><span class="label">Silly</span></button> 
+            <button class="mood-btn" data-mood="grateful"><span class="emoji">🙏</span><span class="label">Grateful</span></button>
+            <button class="mood-btn" data-mood="romantic"><span class="emoji">💖</span><span class="label">Romantic</span></button>
+            <button class="mood-btn" data-mood="focused"><span class="emoji">🎯</span><span class="label">Focused</span></button>
+            <button class="mood-btn" data-mood="dreamy"><span class="emoji">🌙</span><span class="label">Dreamy</span></button>
+            <button class="mood-btn" data-mood="unbothered"><span class="emoji">🔥</span><span class="label">Unbothered</span></button>
+
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="player-area" id="player-area">
+            <button class="close-btn" onclick="closePlayerModal()">✖</button>
+
+            <div class="vinyl-disc" id="vinyl-disc">
+                <img id="album-cover" src="img/placeholder_album.png" alt="Album Cover">
+            </div>
+
+            <div id="song-info">
+                <h2 id="song-title">Music Player Ready</h2>
+                <p id="song-message">Track details will appear here.</p>
+            </div>
+            
+            <audio id="audio-player" loop>
+                <source id="audio-source" src="" type="audio/mp3">
+                Your browser does not support the audio element.
+            </audio>
+
+            <div id="custom-controls">
+                <button id="play-pause-btn" aria-label="Play/Pause">▶</button>
+                
+                <div class="progress-container">
+                    <span class="time-display" id="current-time">0:00</span>
+                    <input type="range" id="audio-slider" value="0" min="0" max="100">
+                    <span class="time-display" id="duration">0:00</span>
+                </div>
+                
+                <div class="volume-container">
+                    <span>🔇</span>
+                    <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.7">
+                    <span>🔊</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const audioPlayer = document.getElementById('audio-player');
+        const audioSource = document.getElementById('audio-source');
+        const vinylDisc = document.getElementById('vinyl-disc');
+        const albumCover = document.getElementById('album-cover');
+        const songTitle = document.getElementById('song-title');
+        const songMessage = document.getElementById('song-message');
+        const moodSelector = document.getElementById('mood-selector');
+        const modalOverlay = document.getElementById('modal-overlay');
+        const playPauseBtn = document.getElementById('play-pause-btn');
+        const audioSlider = document.getElementById('audio-slider');
+        const currentTimeDisplay = document.getElementById('current-time');
+        const durationDisplay = document.getElementById('duration');
+        const volumeSlider = document.getElementById('volume-slider');
+
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+
+        const moodContent = {
+
+            calm: { message: "u calls me moonlight too..'", src: 'music-moodify/Moonlight.mp3', title: "Moonlight", cover: 'album cover/DW.png' },
+            happy: { message: "daydreamin’ on a sunny day,", src: 'music-moodify/Daydreamin.mp3', title: "Daydreamin'", cover: 'album cover/MyE.png' },
+            sad: { message: "baby, u do it so well", src: 'music-moodify/ghostin.mp3', title: "ghostin", cover: 'album cover/ThankUN.png' },
+            cozy: { message: "never thought you'd be so damn hard to replace..", src: 'music-moodify/off the table.mp3', title: "off the table", cover: 'album cover/Pos.png' },
+            confident: { message: "switching a positions for uuu", src: 'music-moodify/positions.mp3', title: "positions", cover: 'album cover/Pos.png' },
+
+            flirty: { message: "so baby let’s keep it secret", src: 'music-moodify/into you.mp3', title: "Into You", cover: 'album cover/DW.png' },
+            energetic: { message: "gonna break free tonight", src: 'music-moodify/break free.mp3', title: "Break Free", cover: 'album cover/MyE.png' },
+            comforted: { message: "my whole life got me ready for u", src: 'music-moodify/pete davidson.mp3', title: "pete davidson", cover: 'album cover/Swe.png' },
+            inspired: { message: "we on another mentatlity", src: 'music-moodify/NTLTC.mp3', title: "no tears left to cry", cover: 'album cover/Swe.png' },
+            nostalgic: { message: "i need to be, the one who takes u home.", src: 'music-moodify/one last time.mp3', title: "One last time", cover: 'album cover/MyE.png' },
+
+            chill: { message: "feelin' successful", src: 'music-moodify/successful.mp3', title: "successful", cover: 'album cover/Swe.png' },
+            ambitious: { message: "somethin''bout makes me feel like a dangerous woman", src: 'music-moodify/DW.mp3', title: "Dangerous Woman", cover: 'album cover/DW.png' },
+            manifest: { message: "i get everything i want 'cause i attract it", src: 'music-moodify/just like magic.mp3', title: "just like magic", cover: 'album cover/Pos.png' },
+            vulnerable: { message: "Goodnight n go, I’m wearing my heart", src: 'music-moodify/goodnight n go.mp3', title: "goodnight n go", cover: 'album cover/Swe.png' },
+            silly: { message: "'I see it, I like it, I want it,'", src: 'music-moodify/7 rings.mp3', title: "7 rings", cover: 'album cover/ThankUN.png' },
+
+            grateful: { message: "'cause he was an angel", src: 'music-moodify/thankunext.mp3', title: "thank u, next", cover: 'album cover/ThankUN.jpg' },
+            romantic: { message: "just as long as i'm the name, on your tattooed heart", src: 'music-moodify/Tattooed Heart.mp3', title: "Tattooed Heart", cover: 'album cover/YoursT.png' },
+            focused: { message: "tell me what's your motive", src: 'music-moodify/motive.mp3', title: "motive", cover: 'album cover/Pos.png' },
+            dreamy: { message: "you're such a dream to me", src: 'music-moodify/rem.mp3', title: "r.e.m.", cover: 'album cover/Swe.png' },
+            unbothered: { message: "say that shit with your chest", src: 'music-moodify/yes and.mp3', title: "yes,and?", cover: 'album cover/ES.png' }
+        };
+
+        function openPlayerModal() {
+            modalOverlay.classList.add('visible');
+        }
+
+        function closePlayerModal() {
+            modalOverlay.classList.remove('visible');
+            audioPlayer.pause();
+            vinylDisc.classList.remove('playing');
+            playPauseBtn.textContent = '▶';
+        }
+
+        // --- Custom Player Controls Functions (unchanged) ---
+        function togglePlayPause() {
+            if (audioPlayer.paused) {
+                audioPlayer.play().catch(error => console.log('Playback error:', error));
+                playPauseBtn.textContent = '❚❚';
+                vinylDisc.classList.add('playing');
+            } else {
+                audioPlayer.pause();
+                playPauseBtn.textContent = '▶';
+                vinylDisc.classList.remove('playing');
+            }
+        }
+        
+        function selectMood(mood) {
+            const content = moodContent[mood];
+            if (!content) {
+                console.error("Mood content not found.");
+                return;
+            }
+
+            // 1. Update button state
+            document.querySelectorAll('.mood-btn').forEach(btn => btn.classList.remove('active'));
+            const activeBtn = document.querySelector(`.mood-btn[data-mood="${mood}"]`);
+            if (activeBtn) activeBtn.classList.add('active');
+
+            // 2. Update player content
+            songTitle.textContent = content.title;
+            songMessage.textContent = content.message;
+            albumCover.src = content.cover;
+            audioSource.src = content.src;
+            
+            // 3. Load new source and attempt to play 
+            audioPlayer.load();
+
+            // Attempt to play automatically
+            audioPlayer.play().then(() => {
+                playPauseBtn.textContent = '❚❚';
+                vinylDisc.classList.add('playing');
+            }).catch(error => {
+                // If autoplay is blocked, set to pause state
+                playPauseBtn.textContent = '▶';
+                vinylDisc.classList.remove('playing');
+                console.log('Autoplay blocked. Please press play.', error);
+            });
+            
+            // 4. Open the modal player
+            openPlayerModal();
+        }
+
+        // --- Event Listeners (unchanged) ---
+
+        // Mood Selection Grid
+        moodSelector.addEventListener('click', (event) => {
+            const button = event.target.closest('.mood-btn');
+            if (button) {
+                const mood = button.getAttribute('data-mood');
+                selectMood(mood);
+            }
+        });
+        
+        // Custom Play/Pause Button
+        playPauseBtn.addEventListener('click', togglePlayPause);
+        
+        // Volume Slider Control
+        volumeSlider.addEventListener('input', () => {
+            audioPlayer.volume = volumeSlider.value;
+        });
+
+        // Time Update (Slider and Time Display)
+        audioPlayer.addEventListener('loadedmetadata', () => {
+            audioSlider.max = audioPlayer.duration;
+            durationDisplay.textContent = formatTime(audioPlayer.duration);
+            // Set initial volume from the slider value
+            audioPlayer.volume = volumeSlider.value; 
+        });
+
+        audioPlayer.addEventListener('timeupdate', () => {
+            // Check if the user is not actively dragging the slider
+            if (!audioSlider.dragging) {
+                audioSlider.value = audioPlayer.currentTime;
+                currentTimeDisplay.textContent = formatTime(audioPlayer.currentTime);
+            }
+        });
+
+        // Slider Interaction (User dragging the slider)
+        let isDragging = false;
+        audioSlider.addEventListener('mousedown', () => isDragging = true);
+        audioSlider.addEventListener('mouseup', () => isDragging = false);
+
+        audioSlider.addEventListener('change', () => {
+            // Jump to the position the user dragged the slider to
+            audioPlayer.currentTime = audioSlider.value;
+            currentTimeDisplay.textContent = formatTime(audioPlayer.currentTime);
+        });
+        
+        // Initial setup on load
+        window.onload = () => {
+             audioPlayer.load();
+        };
+    </script>
+</body>
+</html>
