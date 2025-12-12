@@ -569,8 +569,12 @@ async function initCamera(){
     const stream = await navigator.mediaDevices.getUserMedia({
       video: {
         facingMode: { ideal: "user" },
-        width: { ideal: 960 },
+        // --- START OF CHANGES FOR PORTRAIT ASPECT RATIO (3:4) ---
+        // Request a 3:4 portrait aspect ratio (width/height = 0.75)
+        aspectRatio: { ideal: 0.75 }, 
+        width: { ideal: 960 }, 
         height: { ideal: 1280 }
+        // --- END OF CHANGES ---
       },
       audio: false
     });
